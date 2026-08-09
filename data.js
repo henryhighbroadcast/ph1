@@ -20,8 +20,14 @@
    - vimeoId      : the number from your Vimeo URL (as text, in quotes)
    - airDate      : "YYYY-MM-DD" — used to sort, newest first
    - description  : a sentence or two, shown in the player popup
-   - thumbnail    : (optional) URL to a thumbnail image. If left blank,
-                    the site auto-generates one from your Vimeo ID.
+   - thumbnail    : (optional) URL to a thumbnail image. Leave this
+                    blank for almost every video — the site
+                    automatically pulls the CURRENT thumbnail live
+                    from Vimeo every time the page loads, so if you
+                    change a thumbnail on Vimeo, the site picks it up
+                    on its own with no editing here. Only fill this in
+                    if you want to override with a totally custom
+                    image that isn't the Vimeo thumbnail at all.
    - featured     : true or false — true puts it in the big hero
                     banner at the top. Usually just set this on your
                     newest episode and set the old one back to false.
