@@ -84,35 +84,44 @@
   window.addEventListener("scroll", onScroll, { passive: true });
   onScroll();
 
-  function thumbUrl(v) {
-    // Instant placeholder while the live lookup below runs — never worse
-    // than what we had before, just upgraded once fresher data arrives.
-    if (v.thumbnail && v.thumbnail.length) return v.thumbnail;
-    if (v.vimeoId) return "https://vumbnail.com/" + v.vimeoId + ".jpg";
-    return "";
+  // ---- pull live video info straight from Vimeo ----
+  // Every video in data.js only needs vimeoId + category. Title,
+  // description, thumbnail, and air date all get pulled fresh from
+  // Vimeo's own oEmbed API on every page load — so updating a title or
+  // thumbnail on Vimeo just shows up here automatically, no editing
+  // data.js required. Any field you DO set manually in data.js (title,
+  // description, thumbnail, airDate) overrides the live value instead,
+  // in case you ever want to word something differently than the
+  // Vimeo title.
+  function fetchOembed(vimeoId) {
+    var url = "https://vimeo.com/api/oembed.json?url=" +
+      encodeURIComponent("https://vimeo.com/" + vimeoId);
+    return fetch(url)
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .catch(function () { return null; });
   }
 
-  // Asks Vimeo's own oEmbed API for the CURRENT thumbnail and swaps it
-  // into the given <img> (or hero background) once it resolves. This is
-  // what keeps thumbnails in sync automatically when you change one on
-  // Vimeo — no manual re-editing of data.js needed going forward.
-  // Only runs when `thumbnail` isn't manually set in data.js, since a
-  // manual override should always win.
-  function upgradeThumbnail(video, apply) {
-    if (video.thumbnail && video.thumbnail.length) return; // manual override wins
-    if (!video.vimeoId) return;
-    var url = "https://vimeo.com/api/oembed.json?url=" +
-      encodeURIComponent("https://vimeo.com/" + video.vimeoId);
-    fetch(url)
-      .then(function (r) { return r.ok ? r.json() : Promise.reject(); })
-      .then(function (data) {
-        if (data && data.thumbnail_url) apply(data.thumbnail_url);
-      })
-      .catch(function () {
-        // Live lookup failed (offline, Vimeo hiccup, etc.) — the
-        // vumbnail placeholder set above just stays as-is, no error
-        // shown to the visitor.
-      });
+  function hydrateVideo(v) {
+    if (!v.vimeoId) return Promise.resolve(Object.assign({
+      title: "Untitled", description: "", airDate: "1970-01-01", thumbnail: ""
+    }, v));
+
+    return fetchOembed(v.vimeoId).then(function (data) {
+      var live = {
+        title: v.vimeoId,
+        description: "",
+        airDate: "1970-01-01",
+        thumbnail: "https://vumbnail.com/" + v.vimeoId + ".jpg" // used only if oEmbed itself fails
+      };
+      if (data) {
+        if (data.title) live.title = data.title;
+        if (data.description) live.description = data.description;
+        if (data.upload_date) live.airDate = data.upload_date.slice(0, 10);
+        if (data.thumbnail_url) live.thumbnail = data.thumbnail_url;
+      }
+      // v's own explicit fields (if present) win over the live lookup.
+      return Object.assign(live, v);
+    });
   }
 
   function fmtDate(str) {
@@ -158,7 +167,7 @@
     card.setAttribute("role", "button");
     card.setAttribute("aria-label", "Play " + video.title);
 
-    const src = thumbUrl(video);
+    const src = video.thumbnail || "";
 
     card.innerHTML =
       '<div class="card__thumbwrap">' +
@@ -178,11 +187,6 @@
     card.querySelector(".card__meta").textContent = fmtDate(video.airDate);
     card.querySelector(".card__desc").textContent = video.description || "";
 
-    const cardImg = card.querySelector(".card__thumbwrap img");
-    if (cardImg) {
-      upgradeThumbnail(video, function (freshUrl) { cardImg.src = freshUrl; });
-    }
-
     card.addEventListener("click", () => playVideo(video));
     card.addEventListener("keydown", (e) => {
       if (e.key === "Enter" || e.key === " ") {
@@ -198,8 +202,8 @@
     return str.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
   }
 
-  function render() {
-    const sorted = [...VIDEOS].sort((a, b) => (a.airDate < b.airDate ? 1 : -1));
+  function render(videos) {
+    const sorted = [...videos].sort((a, b) => (a.airDate < b.airDate ? 1 : -1));
 
     // ---- HERO ----
     const featured = sorted.find((v) => v.featured) || sorted[0];
@@ -221,13 +225,9 @@
       hero.querySelector(".hero__meta").textContent = "AIRED " + fmtDate(featured.airDate).toUpperCase();
       hero.querySelector(".hero__desc").textContent = featured.description || "";
       hero.querySelector("#heroPlay").addEventListener("click", () => playVideo(featured));
-
-      const heroBg = hero.querySelector(".hero__bg");
-      const heroSrc = thumbUrl(featured);
-      if (heroSrc) heroBg.style.backgroundImage = "url('" + heroSrc + "')";
-      upgradeThumbnail(featured, function (freshUrl) {
-        heroBg.style.backgroundImage = "url('" + freshUrl + "')";
-      });
+      if (featured.thumbnail) {
+        hero.querySelector(".hero__bg").style.backgroundImage = "url('" + featured.thumbnail + "')";
+      }
     }
 
     // ---- CATEGORIES / ROWS ----
@@ -281,5 +281,5 @@
     });
   }
 
-  render();
+  Promise.all(VIDEOS.map(hydrateVideo)).then(render);
 })();

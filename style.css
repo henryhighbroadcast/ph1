@@ -134,6 +134,11 @@ button{ font-family: inherit; cursor: pointer; }
   background-size: cover; background-position: center 20%;
   animation: ph1-kenburns 24s ease-in-out infinite alternate;
 }
+.hero__loading{
+  position: relative; z-index: 2;
+  color: var(--muted); font-size: 0.95rem; font-weight: 500;
+  padding-bottom: 1rem;
+}
 @keyframes ph1-kenburns{
   0%{ transform: scale(1.0); }
   100%{ transform: scale(1.08); }
