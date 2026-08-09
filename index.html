@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PH1 — One Channel. Your Voice.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="intro-bumper" id="introBumper" aria-hidden="true">
+  <div class="intro-bumper__static" id="introStatic">
+    <button class="btn btn--primary intro-bumper__tunein" id="tuneInBtn">Tune In</button>
+  </div>
+  <div class="intro-bumper__flash" id="introFlash"></div>
+  <video id="introVideo" src="assets/stranger.mp4" playsinline></video>
+  <button class="intro-bumper__skip" id="introSkip">Skip Intro</button>
+</div>
+
+<header class="topbar" id="topbar">
+  <div class="topbar__inner">
+    <a class="brand" href="#top">
+      <img class="brand__logo" src="assets/ph1-logo.png" alt="PH1">
+      <span class="brand__tag">
+        <span class="brand__tag-line brand__tag-gold">One Channel.</span>
+        <span class="brand__tag-line brand__tag-green">Your Voice.</span>
+      </span>
+    </a>
+    <span class="school__label">Patrick Henry High Broadcast</span>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero" id="hero">
+    <!-- populated by script.js -->
+  </section>
+
+  <div class="rows" id="rows">
+    <!-- rows populated by script.js -->
+  </div>
+</main>
+
+<footer class="site-footer">
+  <p>PH1 &mdash; Patrick Henry High School Broadcast Program. Videos hosted on Vimeo.</p>
+</footer>
+
+<div class="player-modal" id="playerModal" aria-hidden="true">
+  <div class="player-modal__backdrop" data-close></div>
+  <div class="player-modal__box">
+    <button class="player-modal__close" data-close aria-label="Close video">&times;</button>
+    <div class="player-modal__frame" id="playerFrame"></div>
+    <div class="player-modal__meta">
+      <h2 id="playerTitle"></h2>
+      <p id="playerDesc"></p>
+    </div>
+  </div>
+</div>
+
+<script src="data.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
