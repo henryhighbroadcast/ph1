@@ -85,9 +85,34 @@
   onScroll();
 
   function thumbUrl(v) {
+    // Instant placeholder while the live lookup below runs — never worse
+    // than what we had before, just upgraded once fresher data arrives.
     if (v.thumbnail && v.thumbnail.length) return v.thumbnail;
     if (v.vimeoId) return "https://vumbnail.com/" + v.vimeoId + ".jpg";
     return "";
+  }
+
+  // Asks Vimeo's own oEmbed API for the CURRENT thumbnail and swaps it
+  // into the given <img> (or hero background) once it resolves. This is
+  // what keeps thumbnails in sync automatically when you change one on
+  // Vimeo — no manual re-editing of data.js needed going forward.
+  // Only runs when `thumbnail` isn't manually set in data.js, since a
+  // manual override should always win.
+  function upgradeThumbnail(video, apply) {
+    if (video.thumbnail && video.thumbnail.length) return; // manual override wins
+    if (!video.vimeoId) return;
+    var url = "https://vimeo.com/api/oembed.json?url=" +
+      encodeURIComponent("https://vimeo.com/" + video.vimeoId);
+    fetch(url)
+      .then(function (r) { return r.ok ? r.json() : Promise.reject(); })
+      .then(function (data) {
+        if (data && data.thumbnail_url) apply(data.thumbnail_url);
+      })
+      .catch(function () {
+        // Live lookup failed (offline, Vimeo hiccup, etc.) — the
+        // vumbnail placeholder set above just stays as-is, no error
+        // shown to the visitor.
+      });
   }
 
   function fmtDate(str) {
@@ -153,6 +178,11 @@
     card.querySelector(".card__meta").textContent = fmtDate(video.airDate);
     card.querySelector(".card__desc").textContent = video.description || "";
 
+    const cardImg = card.querySelector(".card__thumbwrap img");
+    if (cardImg) {
+      upgradeThumbnail(video, function (freshUrl) { cardImg.src = freshUrl; });
+    }
+
     card.addEventListener("click", () => playVideo(video));
     card.addEventListener("keydown", (e) => {
       if (e.key === "Enter" || e.key === " ") {
@@ -192,8 +222,12 @@
       hero.querySelector(".hero__desc").textContent = featured.description || "";
       hero.querySelector("#heroPlay").addEventListener("click", () => playVideo(featured));
 
+      const heroBg = hero.querySelector(".hero__bg");
       const heroSrc = thumbUrl(featured);
-      if (heroSrc) hero.querySelector(".hero__bg").style.backgroundImage = "url('" + heroSrc + "')";
+      if (heroSrc) heroBg.style.backgroundImage = "url('" + heroSrc + "')";
+      upgradeThumbnail(featured, function (freshUrl) {
+        heroBg.style.backgroundImage = "url('" + freshUrl + "')";
+      });
     }
 
     // ---- CATEGORIES / ROWS ----
