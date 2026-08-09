@@ -35,4 +35,5 @@ const VIDEOS = [
   { vimeoId: "1216712429", category: "Archives", featured: true },
   { vimeoId: "1216712427", category: "Archives" },
   { vimeoId: "1216821487", category: "Archives" },
+  { vimeoId: "1216821430", category: "Critically Acclaimed" },
 ];
