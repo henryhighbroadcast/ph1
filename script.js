@@ -261,10 +261,20 @@
           '</div>' +
           '<span class="row__count"></span>' +
         '</div>' +
-        '<div class="row__track"></div>';
+        '<div class="row__track-wrap">' +
+          '<button class="row__arrow row__arrow--prev" type="button" aria-label="Scroll ' + cat + ' left">' +
+            '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 4.5L8 12l7.5 7.5 1.4-1.4L10.8 12l6.1-6.1z"/></svg>' +
+          '</button>' +
+          '<div class="row__track"></div>' +
+          '<button class="row__arrow row__arrow--next" type="button" aria-label="Scroll ' + cat + ' right">' +
+            '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8.5 4.5L16 12l-7.5 7.5-1.4-1.4L13.2 12 7.1 5.9z"/></svg>' +
+          '</button>' +
+        '</div>';
       row.querySelector(".row__title").textContent = cat;
       row.querySelector(".row__count").textContent = items.length + (items.length === 1 ? " video" : " videos");
       const track = row.querySelector(".row__track");
+      const prevArrow = row.querySelector(".row__arrow--prev");
+      const nextArrow = row.querySelector(".row__arrow--next");
 
       if (isArchive(cat)) {
         const leadTile = document.createElement("div");
@@ -278,7 +288,44 @@
       items.forEach((v) => track.appendChild(buildCard(v)));
 
       rowsEl.appendChild(row);
+      wireArrows(track, prevArrow, nextArrow);
     });
+  }
+
+  // Click targets so a plain mouse (no touchpad swipe, no keyboard) can
+  // still reach cards past the first screenful — the track's own
+  // scrollbar is hidden for looks, so this is the only way in for them.
+  function wireArrows(track, prevArrow, nextArrow) {
+    // A generous tolerance (rather than an exact 0 / scrollWidth-clientWidth
+    // check) absorbs sub-pixel rounding and the track's own scroll-snap
+    // resting position, which can land a few pixels off the true edge.
+    var EDGE_TOLERANCE = 48;
+
+    function update() {
+      var maxScroll = track.scrollWidth - track.clientWidth;
+      if (maxScroll <= EDGE_TOLERANCE) {
+        prevArrow.classList.add("is-hidden");
+        nextArrow.classList.add("is-hidden");
+        return;
+      }
+      prevArrow.classList.remove("is-hidden");
+      nextArrow.classList.remove("is-hidden");
+      prevArrow.disabled = track.scrollLeft <= EDGE_TOLERANCE;
+      nextArrow.disabled = track.scrollLeft >= maxScroll - EDGE_TOLERANCE;
+    }
+
+    prevArrow.addEventListener("click", () => {
+      track.scrollBy({ left: -track.clientWidth * 0.85, behavior: "smooth" });
+    });
+    nextArrow.addEventListener("click", () => {
+      track.scrollBy({ left: track.clientWidth * 0.85, behavior: "smooth" });
+    });
+    track.addEventListener("scroll", update);
+    window.addEventListener("resize", update);
+    // Thumbnails loading in can change scrollWidth after the initial
+    // layout pass, so re-check shortly after render too.
+    requestAnimationFrame(update);
+    setTimeout(update, 400);
   }
 
   Promise.all(VIDEOS.map(hydrateVideo)).then(render);

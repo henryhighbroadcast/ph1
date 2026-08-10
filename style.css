@@ -247,12 +247,33 @@ button{ font-family: inherit; cursor: pointer; }
 .row__count{
   font-size: 0.8rem; color: var(--muted);
 }
+.row__track-wrap{ position: relative; }
 .row__track{
   display:flex; gap: 0.5rem; overflow-x: auto;
   padding: 2.2rem 2.5rem 2.6rem;
   scroll-snap-type: x proximity;
 }
 .row__track::-webkit-scrollbar{ height: 0; }
+
+/* Mouse-only visitors have no touchpad swipe and no visible scrollbar
+   to grab (it's hidden above) — these arrows are their only way to
+   reach cards beyond the first screenful. Keep them real, focusable
+   <button> elements rather than decoration. */
+.row__arrow{
+  position: absolute; top: 0; bottom: 0; z-index: 7;
+  width: 48px; border: none; background: linear-gradient(90deg, rgba(5,5,5,0.85), rgba(5,5,5,0));
+  color: var(--text); display:flex; align-items:center; justify-content:center;
+  opacity: 0.85; transition: opacity 0.15s;
+}
+.row__arrow:hover{ opacity: 1; }
+.row__arrow svg{ width: 26px; height: 26px; filter: drop-shadow(0 1px 4px rgba(0,0,0,0.7)); }
+.row__arrow--prev{ left: 0; }
+.row__arrow--next{
+  right: 0;
+  background: linear-gradient(270deg, rgba(5,5,5,0.85), rgba(5,5,5,0));
+}
+.row__arrow:disabled{ opacity: 0; pointer-events: none; }
+.row__arrow.is-hidden{ display: none; }
 
 .card{
   flex: 0 0 300px;
@@ -381,6 +402,8 @@ button{ font-family: inherit; cursor: pointer; }
   .brand__logo{ height: 28px; }
   .row__head{ padding: 0 1.2rem; }
   .row__track{ padding: 1.6rem 1.2rem 2rem; }
+  .row__arrow{ width: 36px; }
+  .row__arrow svg{ width: 20px; height: 20px; }
   .card{ flex-basis: 220px; }
   .row__lead-tile{ flex-basis: 140px; height: 123.75px; }
   .card:hover{ transform: scale(1.08) translateY(-6px); }
