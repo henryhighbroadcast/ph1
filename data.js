@@ -42,6 +42,17 @@ const SITE = {
 };
 
 const VIDEOS = [
+  // ---- Season 2026-27 ----
+  {
+    vimeoId: "Uxa02keHG48",
+    source: "youtube",
+    category: "Season 2026-27",
+    title: "PH1 // S2 E1 // 08.24.26",
+    description: "Your 2026-27 Season Premiere is here! Welcome back for this opening episode hosted by Stella and Maci. Featuring a tribute to Coach Reggie, Get To Know Principal Kray, catch up on summer, and check out our Senior Backpacks!",
+    airDate: "2026-08-24",
+    featured: true
+  },
+
   // ---- Critically Acclaimed ----
   {
     vimeoId: "S015Z_mQefs",
@@ -149,8 +160,7 @@ const VIDEOS = [
     category: "Archives",
     title: "PH1 // E26 // 05.18.26",
     description: "The 2025-26 PH1 season finale. Relive the magic with J Gibb and Nicky D.",
-    airDate: "2026-05-18",
-    featured: true
+    airDate: "2026-05-18"
   },
   {
     vimeoId: "irGcifYX5RY",
