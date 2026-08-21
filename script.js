@@ -102,6 +102,8 @@
   }
 
   function hydrateVideo(v) {
+    if (v.source === "bunny") return Promise.resolve(v); // already fully hydrated by the Worker
+
     if (!v.vimeoId) return Promise.resolve(Object.assign({
       title: "Untitled", description: "", airDate: "1970-01-01", thumbnail: ""
     }, v));
@@ -132,10 +134,16 @@
   function playVideo(video) {
     var modal = document.getElementById("playerModal");
     var frame = document.getElementById("playerFrame");
+    var src;
+    if (video.source === "bunny") {
+      src = "https://player.mediadelivery.net/embed/" + video.bunnyLibraryId +
+        "/" + encodeURIComponent(video.vimeoId) + "?autoplay=true";
+    } else {
+      src = "https://player.vimeo.com/video/" + encodeURIComponent(video.vimeoId) +
+        "?autoplay=1&title=0&byline=0&portrait=0";
+    }
     frame.innerHTML =
-      '<iframe src="https://player.vimeo.com/video/' +
-      encodeURIComponent(video.vimeoId) +
-      '?autoplay=1&title=0&byline=0&portrait=0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>';
+      '<iframe src="' + src + '" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen></iframe>';
     document.getElementById("playerTitle").textContent = video.title;
     document.getElementById("playerDesc").textContent = video.description || "";
     modal.classList.add("is-open");
@@ -261,20 +269,10 @@
           '</div>' +
           '<span class="row__count"></span>' +
         '</div>' +
-        '<div class="row__track-wrap">' +
-          '<button class="row__arrow row__arrow--prev" type="button" aria-label="Scroll ' + cat + ' left">' +
-            '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 4.5L8 12l7.5 7.5 1.4-1.4L10.8 12l6.1-6.1z"/></svg>' +
-          '</button>' +
-          '<div class="row__track"></div>' +
-          '<button class="row__arrow row__arrow--next" type="button" aria-label="Scroll ' + cat + ' right">' +
-            '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8.5 4.5L16 12l-7.5 7.5-1.4-1.4L13.2 12 7.1 5.9z"/></svg>' +
-          '</button>' +
-        '</div>';
+        '<div class="row__track"></div>';
       row.querySelector(".row__title").textContent = cat;
       row.querySelector(".row__count").textContent = items.length + (items.length === 1 ? " video" : " videos");
       const track = row.querySelector(".row__track");
-      const prevArrow = row.querySelector(".row__arrow--prev");
-      const nextArrow = row.querySelector(".row__arrow--next");
 
       if (isArchive(cat)) {
         const leadTile = document.createElement("div");
@@ -288,45 +286,42 @@
       items.forEach((v) => track.appendChild(buildCard(v)));
 
       rowsEl.appendChild(row);
-      wireArrows(track, prevArrow, nextArrow);
     });
   }
 
-  // Click targets so a plain mouse (no touchpad swipe, no keyboard) can
-  // still reach cards past the first screenful — the track's own
-  // scrollbar is hidden for looks, so this is the only way in for them.
-  function wireArrows(track, prevArrow, nextArrow) {
-    // A generous tolerance (rather than an exact 0 / scrollWidth-clientWidth
-    // check) absorbs sub-pixel rounding and the track's own scroll-snap
-    // resting position, which can land a few pixels off the true edge.
-    var EDGE_TOLERANCE = 48;
+  // Set this to your deployed Worker's URL once it's live (see
+  // UPLOADER_SETUP.md). Leave blank to skip — the site works fine
+  // without it, just won't show anything from the one-click uploader.
+  var UPLOADER_API = "";
 
-    function update() {
-      var maxScroll = track.scrollWidth - track.clientWidth;
-      if (maxScroll <= EDGE_TOLERANCE) {
-        prevArrow.classList.add("is-hidden");
-        nextArrow.classList.add("is-hidden");
-        return;
-      }
-      prevArrow.classList.remove("is-hidden");
-      nextArrow.classList.remove("is-hidden");
-      prevArrow.disabled = track.scrollLeft <= EDGE_TOLERANCE;
-      nextArrow.disabled = track.scrollLeft >= maxScroll - EDGE_TOLERANCE;
-    }
-
-    prevArrow.addEventListener("click", () => {
-      track.scrollBy({ left: -track.clientWidth * 0.85, behavior: "smooth" });
-    });
-    nextArrow.addEventListener("click", () => {
-      track.scrollBy({ left: track.clientWidth * 0.85, behavior: "smooth" });
-    });
-    track.addEventListener("scroll", update);
-    window.addEventListener("resize", update);
-    // Thumbnails loading in can change scrollWidth after the initial
-    // layout pass, so re-check shortly after render too.
-    requestAnimationFrame(update);
-    setTimeout(update, 400);
+  function fetchUploaderVideos() {
+    if (!UPLOADER_API) return Promise.resolve([]);
+    return fetch(UPLOADER_API + "/api/videos")
+      .then(function (r) { return r.ok ? r.json() : []; })
+      .then(function (list) {
+        return list
+          .filter(function (v) { return v.ready; }) // hide anything still processing on Bunny
+          .map(function (v) {
+            return {
+              vimeoId: v.videoId, // reusing this field name so the rest of the code needs no changes
+              bunnyLibraryId: v.libraryId,
+              source: "bunny",
+              title: v.title,
+              description: v.description,
+              category: v.category,
+              airDate: v.airDate,
+              thumbnail: v.thumbnail,
+              featured: v.featured
+            };
+          });
+      })
+      .catch(function () { return []; }); // Worker unreachable — just show what data.js has
   }
 
-  Promise.all(VIDEOS.map(hydrateVideo)).then(render);
+  Promise.all([
+    Promise.all(VIDEOS.map(hydrateVideo)),
+    fetchUploaderVideos()
+  ]).then(function (results) {
+    render(results[0].concat(results[1]));
+  });
 })();
