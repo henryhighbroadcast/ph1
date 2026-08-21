@@ -84,46 +84,22 @@
   window.addEventListener("scroll", onScroll, { passive: true });
   onScroll();
 
-  // ---- pull live video info straight from Vimeo ----
-  // Every video in data.js only needs vimeoId + category. Title,
-  // description, thumbnail, and air date all get pulled fresh from
-  // Vimeo's own oEmbed API on every page load — so updating a title or
-  // thumbnail on Vimeo just shows up here automatically, no editing
-  // data.js required. Any field you DO set manually in data.js (title,
-  // description, thumbnail, airDate) overrides the live value instead,
-  // in case you ever want to word something differently than the
-  // Vimeo title.
-  function fetchOembed(vimeoId) {
-    var url = "https://vimeo.com/api/oembed.json?url=" +
-      encodeURIComponent("https://vimeo.com/" + vimeoId);
-    return fetch(url)
-      .then(function (r) { return r.ok ? r.json() : null; })
-      .catch(function () { return null; });
-  }
-
+  // ---- pull video info: YouTube by default, or Bunny if flagged ----
+  // Every video in data.js needs vimeoId (reused as a generic ID field
+  // name) + category. Since YouTube doesn't reliably hand back
+  // description/air-date the way Vimeo's oEmbed used to, those need to
+  // be set explicitly in data.js — title and thumbnail have automatic
+  // fallbacks below if you skip them.
   function hydrateVideo(v) {
     if (v.source === "bunny") return Promise.resolve(v); // already fully hydrated by the Worker
 
-    if (!v.vimeoId) return Promise.resolve(Object.assign({
-      title: "Untitled", description: "", airDate: "1970-01-01", thumbnail: ""
-    }, v));
-
-    return fetchOembed(v.vimeoId).then(function (data) {
-      var live = {
-        title: v.vimeoId,
-        description: "",
-        airDate: "1970-01-01",
-        thumbnail: "https://vumbnail.com/" + v.vimeoId + ".jpg" // used only if oEmbed itself fails
-      };
-      if (data) {
-        if (data.title) live.title = data.title;
-        if (data.description) live.description = data.description;
-        if (data.upload_date) live.airDate = data.upload_date.slice(0, 10);
-        if (data.thumbnail_url) live.thumbnail = data.thumbnail_url;
-      }
-      // v's own explicit fields (if present) win over the live lookup.
-      return Object.assign(live, v);
-    });
+    var live = {
+      title: v.vimeoId,
+      description: "",
+      airDate: "1970-01-01",
+      thumbnail: "https://img.youtube.com/vi/" + v.vimeoId + "/maxresdefault.jpg"
+    };
+    return Promise.resolve(Object.assign(live, v));
   }
 
   function fmtDate(str) {
@@ -139,8 +115,7 @@
       src = "https://player.mediadelivery.net/embed/" + video.bunnyLibraryId +
         "/" + encodeURIComponent(video.vimeoId) + "?autoplay=true";
     } else {
-      src = "https://player.vimeo.com/video/" + encodeURIComponent(video.vimeoId) +
-        "?autoplay=1&title=0&byline=0&portrait=0";
+      src = "https://www.youtube.com/embed/" + encodeURIComponent(video.vimeoId) + "?autoplay=1";
     }
     frame.innerHTML =
       '<iframe src="' + src + '" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen></iframe>';
@@ -168,6 +143,19 @@
     return SITE.archiveCategories && SITE.archiveCategories.indexOf(category) !== -1;
   }
 
+  // YouTube's maxresdefault.jpg thumbnail doesn't exist for every
+  // video (older/lower-res uploads often lack it and 404). This
+  // degrades gracefully to hqdefault.jpg (almost always present)
+  // instead of immediately giving up and showing "NO THUMBNAIL".
+  window.__ph1ThumbFallback = function (imgEl, youtubeId) {
+    if (imgEl.dataset.fallbackTried) {
+      imgEl.parentElement.innerHTML = '<span class="card__fallback">NO THUMBNAIL</span>';
+    } else {
+      imgEl.dataset.fallbackTried = "1";
+      imgEl.src = "https://img.youtube.com/vi/" + youtubeId + "/hqdefault.jpg";
+    }
+  };
+
   function buildCard(video) {
     const card = document.createElement("div");
     card.className = isArchive(video.category) ? "card card--archive" : "card";
@@ -176,11 +164,14 @@
     card.setAttribute("aria-label", "Play " + video.title);
 
     const src = video.thumbnail || "";
+    const errorHandler = video.source === "bunny"
+      ? "this.parentElement.innerHTML=&quot;<span class=&#39;card__fallback&#39;>NO THUMBNAIL</span>&quot;"
+      : "window.__ph1ThumbFallback(this, '" + video.vimeoId + "')";
 
     card.innerHTML =
       '<div class="card__thumbwrap">' +
         (src
-          ? '<img alt="" loading="lazy" src="' + src + '" onerror="this.parentElement.innerHTML=&quot;<span class=&#39;card__fallback&#39;>NO THUMBNAIL</span>&quot;">'
+          ? '<img alt="" loading="lazy" src="' + src + '" onerror="' + errorHandler + '">'
           : '<span class="card__fallback">NO THUMBNAIL</span>') +
         (isArchive(video.category) ? '<span class="card__archive-flag">Classic</span>' : '') +
         '<div class="card__play"><svg viewBox="0 0 24 24" fill="#fff"><circle cx="12" cy="12" r="11" fill="rgba(0,0,0,0.4)" stroke="#fff" stroke-width="1.4"/><path d="M9.5 8l7 4-7 4V8z"/></svg></div>' +
