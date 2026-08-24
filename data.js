@@ -105,6 +105,14 @@ const VIDEOS = [
 
   // ---- Segments & Highlights ----
   {
+    vimeoId: "c9-gXAGRz_8",
+    source: "youtube",
+    category: "Segments & Highlights",
+    title: "Get To Know Principal Kray",
+    description: "Meet Patrick Henry's new principal.\nHosted by Cameron K\nProduced by Cameron and Gavin",
+    airDate: "2026-08-24"
+  },
+  {
     vimeoId: "PVGXRCtvYgY",
     source: "youtube",
     category: "Segments & Highlights",
