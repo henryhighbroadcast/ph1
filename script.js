@@ -1,24 +1,22 @@
 (function () {
   // ---- intro bumper: static frame -> Tune In -> flash -> video -> fade home ----
-  // Plays once every 24 hours.
-  var BUMPER_KEY = "ph1_bumper_last_shown";
-  var BUMPER_HOURS = 24;
+  // Plays once per browser session — sessionStorage clears when the tab/
+  // window is closed, so a brand new session always gets the intro again,
+  // but it won't replay on every hash link click within the same visit.
+  var BUMPER_KEY = "ph1_bumper_shown_this_session";
   var BUMPER_MAX_SECONDS = 8; // safety cutoff once the video starts, in case it runs long
   var FLASH_MS = 480;
 
   function shouldShowBumper() {
     try {
-      var last = localStorage.getItem(BUMPER_KEY);
-      if (!last) return true;
-      var elapsedHours = (Date.now() - parseInt(last, 10)) / 3600000;
-      return elapsedHours >= BUMPER_HOURS;
+      return !sessionStorage.getItem(BUMPER_KEY);
     } catch (e) {
       return false; // if storage is blocked, don't force the bumper every time
     }
   }
 
   function markBumperShown() {
-    try { localStorage.setItem(BUMPER_KEY, String(Date.now())); } catch (e) {}
+    try { sessionStorage.setItem(BUMPER_KEY, "1"); } catch (e) {}
   }
 
   function dismissBumper(markShown) {
@@ -260,10 +258,20 @@
           '</div>' +
           '<span class="row__count"></span>' +
         '</div>' +
-        '<div class="row__track"></div>';
+        '<div class="row__track-wrap">' +
+          '<button class="row__arrow row__arrow--prev" type="button" aria-label="Scroll ' + cat + ' left">' +
+            '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 4.5L8 12l7.5 7.5 1.4-1.4L10.8 12l6.1-6.1z"/></svg>' +
+          '</button>' +
+          '<div class="row__track"></div>' +
+          '<button class="row__arrow row__arrow--next" type="button" aria-label="Scroll ' + cat + ' right">' +
+            '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8.5 4.5L16 12l-7.5 7.5-1.4-1.4L13.2 12 7.1 5.9z"/></svg>' +
+          '</button>' +
+        '</div>';
       row.querySelector(".row__title").textContent = cat;
       row.querySelector(".row__count").textContent = items.length + (items.length === 1 ? " video" : " videos");
       const track = row.querySelector(".row__track");
+      const prevArrow = row.querySelector(".row__arrow--prev");
+      const nextArrow = row.querySelector(".row__arrow--next");
 
       if (isArchive(cat)) {
         const leadTile = document.createElement("div");
@@ -277,7 +285,44 @@
       items.forEach((v) => track.appendChild(buildCard(v)));
 
       rowsEl.appendChild(row);
+      wireArrows(track, prevArrow, nextArrow);
     });
+  }
+
+  // Click targets so a plain mouse (no touchpad swipe, no keyboard) can
+  // still reach cards past the first screenful — the track's own
+  // scrollbar is hidden for looks, so this is the only way in for them.
+  function wireArrows(track, prevArrow, nextArrow) {
+    // A generous tolerance (rather than an exact 0 / scrollWidth-clientWidth
+    // check) absorbs sub-pixel rounding and the track's own scroll-snap
+    // resting position, which can land a few pixels off the true edge.
+    var EDGE_TOLERANCE = 48;
+
+    function update() {
+      var maxScroll = track.scrollWidth - track.clientWidth;
+      if (maxScroll <= EDGE_TOLERANCE) {
+        prevArrow.classList.add("is-hidden");
+        nextArrow.classList.add("is-hidden");
+        return;
+      }
+      prevArrow.classList.remove("is-hidden");
+      nextArrow.classList.remove("is-hidden");
+      prevArrow.disabled = track.scrollLeft <= EDGE_TOLERANCE;
+      nextArrow.disabled = track.scrollLeft >= maxScroll - EDGE_TOLERANCE;
+    }
+
+    prevArrow.addEventListener("click", () => {
+      track.scrollBy({ left: -track.clientWidth * 0.85, behavior: "smooth" });
+    });
+    nextArrow.addEventListener("click", () => {
+      track.scrollBy({ left: track.clientWidth * 0.85, behavior: "smooth" });
+    });
+    track.addEventListener("scroll", update);
+    window.addEventListener("resize", update);
+    // Thumbnails loading in can change scrollWidth after the initial
+    // layout pass, so re-check shortly after render too.
+    requestAnimationFrame(update);
+    setTimeout(update, 400);
   }
 
   // Set this to your deployed Worker's URL once it's live (see
