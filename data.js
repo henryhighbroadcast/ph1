@@ -33,8 +33,8 @@ const SITE = {
   tagline: "One Channel. Your Voice.",
   categoryOrder: [
     "Season 2026-27",
-    "Critically Acclaimed",
     "Segments & Highlights",
+    "Critically Acclaimed",
     "Student Films & Projects",
     "Archives"
   ],
