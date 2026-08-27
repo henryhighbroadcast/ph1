@@ -95,6 +95,7 @@ button{ font-family: inherit; cursor: pointer; }
   border-bottom: 1px solid var(--line);
 }
 .topbar__inner{
+  position: relative;
   max-width: 1600px; margin: 0 auto;
   display:flex; align-items:center; justify-content: space-between;
   padding: 1rem 2.5rem;
@@ -109,6 +110,7 @@ button{ font-family: inherit; cursor: pointer; }
 .brand__tag-gold{ color: var(--gold); }
 .brand__tag-green{ color: var(--green-bright); }
 .school__label{
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
   font-size: 0.82rem; font-weight: 500; letter-spacing: 0.02em;
   color: #fff; opacity: 0.9; white-space: nowrap;
 }
@@ -116,14 +118,19 @@ button{ font-family: inherit; cursor: pointer; }
   margin-left: auto;
   font-weight: 800; font-size: 0.95rem; letter-spacing: 0.01em;
   white-space: nowrap; padding: 0.3rem 0;
-  background: linear-gradient(90deg,
-    var(--gold) 0%, var(--gold) 44%,
-    var(--green-bright) 56%, var(--green-bright) 100%);
-  -webkit-background-clip: text; background-clip: text;
-  -webkit-text-fill-color: transparent; color: transparent;
   transition: opacity 0.15s ease;
 }
 .topbar__cta:hover{ opacity: 0.82; }
+.topbar__cta-a{ color: var(--gold); }
+.topbar__cta-b{ color: var(--green-bright); }
+/* The gold->green blend happens right on the "//" itself, not smeared
+   across whichever letter happens to land at the 44-56% mark of the
+   whole string. */
+.topbar__cta-sep{
+  background: linear-gradient(90deg, var(--gold) 0%, var(--green-bright) 100%);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: transparent;
+}
 @media (max-width: 860px){
   .topbar__cta{ font-size: 0.78rem; }
 }
