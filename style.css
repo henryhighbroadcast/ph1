@@ -111,7 +111,7 @@ button{ font-family: inherit; cursor: pointer; }
 .brand__tag-green{ color: var(--green-bright); }
 .school__label{
   position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
-  font-size: 0.82rem; font-weight: 500; letter-spacing: 0.02em;
+  font-size: 0.94rem; font-weight: 500; letter-spacing: 0.02em;
   color: #fff; opacity: 0.9; white-space: nowrap;
 }
 .topbar__cta{
