@@ -112,9 +112,56 @@ button{ font-family: inherit; cursor: pointer; }
   font-size: 0.82rem; font-weight: 500; letter-spacing: 0.02em;
   color: #fff; opacity: 0.9; white-space: nowrap;
 }
+.topbar__cta{
+  margin-left: auto;
+  font-weight: 800; font-size: 0.95rem; letter-spacing: 0.01em;
+  white-space: nowrap; padding: 0.3rem 0;
+  background: linear-gradient(90deg,
+    var(--gold) 0%, var(--gold) 44%,
+    var(--green-bright) 56%, var(--green-bright) 100%);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: transparent;
+  transition: opacity 0.15s ease;
+}
+.topbar__cta:hover{ opacity: 0.82; }
+@media (max-width: 860px){
+  .topbar__cta{ font-size: 0.78rem; }
+}
 @media (max-width: 640px){
   .school__label{ display:none; }
   .brand__tag{ font-size: 0.68rem; }
+  .topbar__cta{ font-size: 0.62rem; }
+}
+
+/* ==========================================================
+   FORM PAGES — Story Requests / Submit Media
+   ========================================================== */
+.form-page{
+  max-width: 900px; margin: 0 auto;
+  padding: 8rem 1.5rem 5rem;
+}
+.form-page__title{
+  font-weight: 800; font-size: clamp(1.8rem, 4vw, 2.6rem);
+  margin: 0 0 0.6rem; letter-spacing: -0.01em;
+  background: linear-gradient(90deg, var(--gold) 0%, var(--green-bright) 100%);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: transparent;
+}
+.form-page__sub{
+  color: var(--muted); font-size: 1rem; line-height: 1.6;
+  max-width: 620px; margin: 0 0 2rem;
+}
+.form-page__frame-wrap{
+  background: var(--panel); border: 1px solid var(--line);
+  border-radius: 10px; overflow: hidden; padding: 0.5rem;
+}
+.form-page__iframe{
+  width: 100%; height: 1400px; border: 0; border-radius: 6px;
+  display: block; background: #fff;
+}
+@media (max-width: 640px){
+  .form-page{ padding: 7rem 1rem 3rem; }
+  .form-page__iframe{ height: 1600px; }
 }
 
 /* ==========================================================
