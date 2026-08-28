@@ -142,15 +142,25 @@
   }
 
   // YouTube's maxresdefault.jpg thumbnail doesn't exist for every
-  // video (older/lower-res uploads often lack it and 404). This
-  // degrades gracefully to hqdefault.jpg (almost always present)
-  // instead of immediately giving up and showing "NO THUMBNAIL".
+  // video (older/lower-res uploads often lack it). This degrades
+  // gracefully to hqdefault.jpg (almost always present) instead of
+  // immediately giving up and showing "NO THUMBNAIL".
   window.__ph1ThumbFallback = function (imgEl, youtubeId) {
     if (imgEl.dataset.fallbackTried) {
       imgEl.parentElement.innerHTML = '<span class="card__fallback">NO THUMBNAIL</span>';
     } else {
       imgEl.dataset.fallbackTried = "1";
       imgEl.src = "https://img.youtube.com/vi/" + youtubeId + "/hqdefault.jpg";
+    }
+  };
+
+  // A missing maxresdefault.jpg doesn't actually 404 — YouTube returns
+  // a 200 OK with a generic 120x90 gray placeholder image instead, so
+  // onerror above never fires. Catch that case on load by checking the
+  // image's real dimensions (any genuine thumbnail is much bigger).
+  window.__ph1ThumbCheck = function (imgEl, youtubeId) {
+    if (imgEl.naturalWidth && imgEl.naturalWidth <= 120) {
+      window.__ph1ThumbFallback(imgEl, youtubeId);
     }
   };
 
@@ -162,14 +172,18 @@
     card.setAttribute("aria-label", "Play " + video.title);
 
     const src = video.thumbnail || "";
-    const errorHandler = video.source === "bunny"
+    const isBunny = video.source === "bunny";
+    const errorHandler = isBunny
       ? "this.parentElement.innerHTML=&quot;<span class=&#39;card__fallback&#39;>NO THUMBNAIL</span>&quot;"
       : "window.__ph1ThumbFallback(this, '" + video.vimeoId + "')";
+    const loadHandler = isBunny
+      ? ""
+      : " onload=\"window.__ph1ThumbCheck(this, '" + video.vimeoId + "')\"";
 
     card.innerHTML =
       '<div class="card__thumbwrap">' +
         (src
-          ? '<img alt="" loading="lazy" src="' + src + '" onerror="' + errorHandler + '">'
+          ? '<img alt="" loading="lazy" src="' + src + '" onerror="' + errorHandler + '"' + loadHandler + '>'
           : '<span class="card__fallback">NO THUMBNAIL</span>') +
         (isArchive(video.category) ? '<span class="card__archive-flag">Classic</span>' : '') +
         '<div class="card__play"><svg viewBox="0 0 24 24" fill="#fff"><circle cx="12" cy="12" r="11" fill="rgba(0,0,0,0.4)" stroke="#fff" stroke-width="1.4"/><path d="M9.5 8l7 4-7 4V8z"/></svg></div>' +
