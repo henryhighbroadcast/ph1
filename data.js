@@ -44,13 +44,21 @@ const SITE = {
 const VIDEOS = [
   // ---- Season 2026-27 ----
   {
+    vimeoId: "fz-dYX6-6IM",
+    source: "youtube",
+    category: "Season 2026-27",
+    title: "PH1 // S2 E2 // 08.31.26",
+    description: "From sewers to the streets, Julian and Roman are back in action with another thrilling episode of PH1, bringing their knunchuck skills and critical information the Patrick Henry Patriots need to make it through the week.",
+    airDate: "2026-08-31",
+    featured: true
+  },
+  {
     vimeoId: "Uxa02keHG48",
     source: "youtube",
     category: "Season 2026-27",
     title: "PH1 // S2 E1 // 08.24.26",
     description: "Your 2026-27 Season Premiere is here! Welcome back for this opening episode hosted by Stella and Maci. Featuring a tribute to Coach Reggie, Get To Know Principal Kray, catch up on summer, and check out our Senior Backpacks!",
-    airDate: "2026-08-24",
-    featured: true
+    airDate: "2026-08-24"
   },
 
   // ---- Critically Acclaimed ----
