@@ -105,6 +105,14 @@ const VIDEOS = [
 
   // ---- Segments & Highlights ----
   {
+    vimeoId: "MEMdrtmT7xg",
+    source: "youtube",
+    category: "Segments & Highlights",
+    title: "Checkout Girls Flag Football at PHHS",
+    description: "Produced by Bailey, Kaili, and Sirena",
+    airDate: "2026-08-28"
+  },
+  {
     vimeoId: "c9-gXAGRz_8",
     source: "youtube",
     category: "Segments & Highlights",
