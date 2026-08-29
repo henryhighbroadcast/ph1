@@ -213,6 +213,26 @@
     return str.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
   }
 
+  // Same fix as __ph1ThumbCheck above, but for the hero banner, which
+  // paints its thumbnail as a CSS background-image rather than an
+  // <img> — so there's no onload/onerror to hook. Probe it with a
+  // throwaway Image() first and resolve to whichever URL is actually
+  // a real thumbnail.
+  function resolveHeroThumbnail(video) {
+    if (video.source === "bunny" || !video.vimeoId || !video.thumbnail) {
+      return Promise.resolve(video.thumbnail);
+    }
+    var hqUrl = "https://img.youtube.com/vi/" + video.vimeoId + "/hqdefault.jpg";
+    return new Promise(function (resolve) {
+      var probe = new Image();
+      probe.onload = function () {
+        resolve(probe.naturalWidth && probe.naturalWidth <= 120 ? hqUrl : video.thumbnail);
+      };
+      probe.onerror = function () { resolve(hqUrl); };
+      probe.src = video.thumbnail;
+    });
+  }
+
   function render(videos) {
     const sorted = [...videos].sort((a, b) => (a.airDate < b.airDate ? 1 : -1));
 
@@ -237,7 +257,10 @@
       hero.querySelector(".hero__desc").textContent = featured.description || "";
       hero.querySelector("#heroPlay").addEventListener("click", () => playVideo(featured));
       if (featured.thumbnail) {
-        hero.querySelector(".hero__bg").style.backgroundImage = "url('" + featured.thumbnail + "')";
+        const heroBg = hero.querySelector(".hero__bg");
+        resolveHeroThumbnail(featured).then((url) => {
+          heroBg.style.backgroundImage = "url('" + url + "')";
+        });
       }
     }
 
