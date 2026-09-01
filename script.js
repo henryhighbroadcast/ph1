@@ -206,6 +206,9 @@
       }
     });
 
+    window.__ph1CardRefs = window.__ph1CardRefs || [];
+    window.__ph1CardRefs.push({ el: card, video: video });
+
     return card;
   }
 
@@ -234,6 +237,7 @@
   }
 
   function render(videos) {
+    window.__ph1CardRefs = []; // reset each render — used by the secret cascade trigger below
     const sorted = [...videos].sort((a, b) => (a.airDate < b.airDate ? 1 : -1));
 
     // ---- HERO ----
@@ -396,5 +400,77 @@
     fetchUploaderVideos()
   ]).then(function (results) {
     render(results[0].concat(results[1]));
+  });
+})();
+
+// ============================================================
+// SECRET "GOING LIVE" EASTER EGG — press ~ to skip the normal
+// intro and watch the real site's cards ignite into live,
+// muted, looping playback in a staggered cascade. Built for
+// filming an intro segment; harmless to leave live permanently
+// since nobody will find it by accident.
+// ============================================================
+(function () {
+  var CASCADE_DELAY_MS = 450;  // time between each card igniting — tune to taste
+  var CASCADE_MAX_CARDS = 12;  // keeps the bit snappy even as the library grows
+  var triggered = false;       // guards against double-firing on a held/repeated key
+
+  function igniteCard(ref) {
+    var thumbwrap = ref.el.querySelector(".card__thumbwrap");
+    if (!thumbwrap || thumbwrap.querySelector("iframe")) return; // already ignited
+
+    var v = ref.video;
+    var src;
+    if (v.source === "bunny") {
+      src = "https://player.mediadelivery.net/embed/" + v.bunnyLibraryId +
+        "/" + encodeURIComponent(v.vimeoId) + "?autoplay=true&muted=true&loop=true";
+    } else {
+      src = "https://www.youtube.com/embed/" + encodeURIComponent(v.vimeoId) +
+        "?autoplay=1&mute=1&controls=0&loop=1&playlist=" + encodeURIComponent(v.vimeoId) +
+        "&rel=0&modestbranding=1";
+    }
+
+    thumbwrap.innerHTML =
+      '<iframe src="' + src + '" allow="autoplay" ' +
+      'style="position:absolute;inset:0;width:100%;height:100%;border:0;" frameborder="0"></iframe>';
+    ref.el.classList.add("card--ignited");
+  }
+
+  function runCascade() {
+    var refs = (window.__ph1CardRefs || []).slice(0, CASCADE_MAX_CARDS);
+    refs.forEach(function (ref, i) {
+      setTimeout(function () { igniteCard(ref); }, i * CASCADE_DELAY_MS);
+    });
+  }
+
+  function triggerSecretMode() {
+    if (triggered) return;
+    triggered = true;
+
+    // Skip straight past the normal static-frame/Tune-In/video flow.
+    var bumper = document.getElementById("introBumper");
+    if (bumper && !bumper.hasAttribute("hidden")) {
+      bumper.classList.add("is-hidden");
+      setTimeout(function () { bumper.setAttribute("hidden", ""); }, 550);
+    }
+
+    // Card data loads asynchronously (live YouTube/Bunny lookups), so
+    // wait for at least one card to exist before cascading — give up
+    // quietly after ~10 seconds if something's genuinely wrong rather
+    // than polling forever.
+    var tries = 0;
+    var waitForCards = setInterval(function () {
+      tries++;
+      if ((window.__ph1CardRefs || []).length > 0) {
+        clearInterval(waitForCards);
+        runCascade();
+      } else if (tries > 100) {
+        clearInterval(waitForCards);
+      }
+    }, 100);
+  }
+
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "~") triggerSecretMode();
   });
 })();
