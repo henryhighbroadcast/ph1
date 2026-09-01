@@ -407,19 +407,34 @@
 
 // ============================================================
 // SECRET "GOING LIVE" EASTER EGG — press ~ to skip the normal
-// intro. Cards cascade-ignite (a staggered glow) and arm
-// themselves to play live, muted, looping video on hover; the
-// hero itself cuts from its still frame to live playback a few
-// seconds later. Built for filming an intro segment; harmless to
-// leave live permanently since nobody will find it by accident.
+// intro. A specific, ordered lineup of cards ignites into live,
+// muted, looping playback one at a time, then the hero itself
+// cuts from its still frame to live playback a few seconds
+// later. Built for filming an intro segment; harmless to leave
+// live permanently since nobody will find it by accident.
 // ============================================================
 (function () {
-  var CASCADE_DELAY_MS = 450;   // time between each card igniting — tune to taste
-  var CASCADE_MAX_CARDS = 12;   // keeps the bit snappy even as the library grows
-  var HERO_IGNITE_DELAY_MS = 5000; // how long the hero holds on its still frame first
-  var triggered = false;        // guards against double-firing on a held/repeated key
+  var STAGGER_DELAY_MS = 2000;     // time between each video starting
+  var HERO_IGNITE_DELAY_MS = 3000; // how long the hero holds on its still frame first
+  var triggered = false;           // guards against double-firing on a held/repeated key
 
-  // Shared by the hero and by cards on hover — same muted/looping
+  // The exact "going live" lineup and order for the segment, by video
+  // ID — deliberately curated rather than "whichever cards happen to
+  // render first." Any ID not currently on the page is skipped quietly.
+  var CASCADE_ORDER = [
+    "fz-dYX6-6IM", // PH1 // S2 E2 // 08.31.26
+    "Uxa02keHG48", // PH1 // S2 E1 // 08.24.26
+    "MEMdrtmT7xg", // Checkout Girls Flag Football at PHHS
+    "c9-gXAGRz_8", // Get To Know Principal Kray
+    "PVGXRCtvYgY", // Hot Nuggets of Wisdom // Mr. Miller Weaves Baskets Underwater
+    "r_JPw3KLRO0", // How To Use A High School Parking Lot
+    "nr0GyrFVnSM", // Meet The Patrick Henry High Band
+    "S015Z_mQefs", // You Are Not Alone PSA
+    "Ed9cgZfvAOQ", // Cross Country At The Clovis Invitational
+    "xOmFjdyvNIk"  // Patriot Makes // Spooky Rice Krispie Treats
+  ];
+
+  // Shared by the hero and by cards — same muted/looping
   // background-video treatment, just aimed at different elements.
   function liveEmbedSrc(v) {
     if (v.source === "bunny") {
@@ -427,39 +442,26 @@
         "/" + encodeURIComponent(v.vimeoId) + "?autoplay=true&muted=true&loop=true";
     }
     return "https://www.youtube.com/embed/" + encodeURIComponent(v.vimeoId) +
-      "?autoplay=1&mute=1&controls=0&loop=1&playlist=" + encodeURIComponent(v.vimeoId) +
-      "&rel=0&modestbranding=1";
+      "?autoplay=1&mute=1&controls=0&disablekb=1&fs=0&iv_load_policy=3&loop=1&playlist=" +
+      encodeURIComponent(v.vimeoId) + "&rel=0&modestbranding=1";
   }
 
+  // pointer-events:none so these are purely decorative — otherwise the
+  // cursor passing over one lands ON YouTube's own iframe content, and
+  // it reveals its native play/pause + skip chrome even with
+  // controls=0. With pointer-events:none the browser routes hover and
+  // clicks straight through to the card underneath instead.
   function liveIframeHTML(v) {
-    return '<iframe src="' + liveEmbedSrc(v) + '" allow="autoplay" ' +
-      'style="position:absolute;inset:0;width:100%;height:100%;border:0;" frameborder="0"></iframe>';
-  }
-
-  // Cards don't autoplay once ignited — that's 12 muted videos all
-  // fighting for attention, which reads as noise on camera. Instead
-  // the glow marks them as "live and ready," and hovering (or
-  // focusing, for keyboard parity) is what actually starts playback;
-  // moving off reverts to the frozen thumbnail.
-  function armCardForHover(ref) {
-    var thumbwrap = ref.el.querySelector(".card__thumbwrap");
-    if (!thumbwrap || thumbwrap.dataset.hoverArmed) return;
-    thumbwrap.dataset.hoverArmed = "1";
-
-    var restingHTML = thumbwrap.innerHTML; // the frozen thumbnail state to return to
-    function play() { thumbwrap.innerHTML = liveIframeHTML(ref.video); }
-    function freeze() { thumbwrap.innerHTML = restingHTML; }
-
-    ref.el.addEventListener("mouseenter", play);
-    ref.el.addEventListener("mouseleave", freeze);
-    ref.el.addEventListener("focus", play);
-    ref.el.addEventListener("blur", freeze);
+    return '<iframe src="' + liveEmbedSrc(v) + '" allow="autoplay" tabindex="-1" ' +
+      'style="position:absolute;inset:0;width:100%;height:100%;border:0;pointer-events:none;" ' +
+      'frameborder="0"></iframe>';
   }
 
   function igniteCard(ref) {
-    if (ref.el.classList.contains("card--ignited")) return; // already ignited
+    var thumbwrap = ref.el.querySelector(".card__thumbwrap");
+    if (!thumbwrap || thumbwrap.querySelector("iframe")) return; // already ignited
+    thumbwrap.innerHTML = liveIframeHTML(ref.video);
     ref.el.classList.add("card--ignited");
-    armCardForHover(ref);
   }
 
   function igniteHero() {
@@ -471,9 +473,11 @@
   }
 
   function runCascade() {
-    var refs = (window.__ph1CardRefs || []).slice(0, CASCADE_MAX_CARDS);
-    refs.forEach(function (ref, i) {
-      setTimeout(function () { igniteCard(ref); }, i * CASCADE_DELAY_MS);
+    var refs = window.__ph1CardRefs || [];
+    CASCADE_ORDER.forEach(function (vimeoId, i) {
+      var ref = refs.find(function (r) { return r.video.vimeoId === vimeoId; });
+      if (!ref) return; // that video isn't currently on the page — skip it
+      setTimeout(function () { igniteCard(ref); }, i * STAGGER_DELAY_MS);
     });
   }
 
