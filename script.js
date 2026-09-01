@@ -414,9 +414,10 @@
 // live permanently since nobody will find it by accident.
 // ============================================================
 (function () {
-  var STAGGER_DELAY_MS = 2000;     // time between each video starting
-  var HERO_IGNITE_DELAY_MS = 3000; // how long the hero holds on its still frame first
-  var triggered = false;           // guards against double-firing on a held/repeated key
+  var HERO_IGNITE_DELAY_MS = 3000;   // how long the hero holds on its still frame first
+  var CASCADE_START_DELAY_MS = 2000; // gap after the hero before the first card ignites
+  var STAGGER_DELAY_MS = 3000;       // gap between each card after that
+  var triggered = false;             // guards against double-firing on a held/repeated key
 
   // The exact "going live" lineup and order for the segment, by video
   // ID — deliberately curated rather than "whichever cards happen to
@@ -474,10 +475,11 @@
 
   function runCascade() {
     var refs = window.__ph1CardRefs || [];
+    var startAt = HERO_IGNITE_DELAY_MS + CASCADE_START_DELAY_MS; // first card follows the hero
     CASCADE_ORDER.forEach(function (vimeoId, i) {
       var ref = refs.find(function (r) { return r.video.vimeoId === vimeoId; });
       if (!ref) return; // that video isn't currently on the page — skip it
-      setTimeout(function () { igniteCard(ref); }, i * STAGGER_DELAY_MS);
+      setTimeout(function () { igniteCard(ref); }, startAt + i * STAGGER_DELAY_MS);
     });
   }
 
