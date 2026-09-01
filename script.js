@@ -414,8 +414,8 @@
 // live permanently since nobody will find it by accident.
 // ============================================================
 (function () {
-  var HERO_IGNITE_DELAY_MS = 3000;   // how long the hero holds on its still frame first
-  var CASCADE_START_DELAY_MS = 2000; // gap after the hero before the first card ignites
+  var HERO_IGNITE_DELAY_MS = 2000;   // how long the hero holds on its still frame first
+  var CASCADE_START_DELAY_MS = 3000; // gap after the hero before the first card ignites
   var STAGGER_DELAY_MS = 3000;       // gap between each card after that
   var triggered = false;             // guards against double-firing on a held/repeated key
 
