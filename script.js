@@ -242,10 +242,12 @@
 
     // ---- HERO ----
     const featured = sorted.find((v) => v.featured) || sorted[0];
+    window.__ph1FeaturedVideo = featured; // used by the secret cascade trigger below
     const hero = document.getElementById("hero");
     if (featured) {
       hero.innerHTML =
         '<div class="hero__bg"></div>' +
+        '<div class="hero__video-wrap"></div>' +
         '<div class="hero__inner">' +
           '<span class="hero__tag">New Episode</span>' +
           '<h1 class="hero__title"></h1>' +
@@ -405,35 +407,67 @@
 
 // ============================================================
 // SECRET "GOING LIVE" EASTER EGG — press ~ to skip the normal
-// intro and watch the real site's cards ignite into live,
-// muted, looping playback in a staggered cascade. Built for
-// filming an intro segment; harmless to leave live permanently
-// since nobody will find it by accident.
+// intro. Cards cascade-ignite (a staggered glow) and arm
+// themselves to play live, muted, looping video on hover; the
+// hero itself cuts from its still frame to live playback a few
+// seconds later. Built for filming an intro segment; harmless to
+// leave live permanently since nobody will find it by accident.
 // ============================================================
 (function () {
-  var CASCADE_DELAY_MS = 450;  // time between each card igniting — tune to taste
-  var CASCADE_MAX_CARDS = 12;  // keeps the bit snappy even as the library grows
-  var triggered = false;       // guards against double-firing on a held/repeated key
+  var CASCADE_DELAY_MS = 450;   // time between each card igniting — tune to taste
+  var CASCADE_MAX_CARDS = 12;   // keeps the bit snappy even as the library grows
+  var HERO_IGNITE_DELAY_MS = 5000; // how long the hero holds on its still frame first
+  var triggered = false;        // guards against double-firing on a held/repeated key
+
+  // Shared by the hero and by cards on hover — same muted/looping
+  // background-video treatment, just aimed at different elements.
+  function liveEmbedSrc(v) {
+    if (v.source === "bunny") {
+      return "https://player.mediadelivery.net/embed/" + v.bunnyLibraryId +
+        "/" + encodeURIComponent(v.vimeoId) + "?autoplay=true&muted=true&loop=true";
+    }
+    return "https://www.youtube.com/embed/" + encodeURIComponent(v.vimeoId) +
+      "?autoplay=1&mute=1&controls=0&loop=1&playlist=" + encodeURIComponent(v.vimeoId) +
+      "&rel=0&modestbranding=1";
+  }
+
+  function liveIframeHTML(v) {
+    return '<iframe src="' + liveEmbedSrc(v) + '" allow="autoplay" ' +
+      'style="position:absolute;inset:0;width:100%;height:100%;border:0;" frameborder="0"></iframe>';
+  }
+
+  // Cards don't autoplay once ignited — that's 12 muted videos all
+  // fighting for attention, which reads as noise on camera. Instead
+  // the glow marks them as "live and ready," and hovering (or
+  // focusing, for keyboard parity) is what actually starts playback;
+  // moving off reverts to the frozen thumbnail.
+  function armCardForHover(ref) {
+    var thumbwrap = ref.el.querySelector(".card__thumbwrap");
+    if (!thumbwrap || thumbwrap.dataset.hoverArmed) return;
+    thumbwrap.dataset.hoverArmed = "1";
+
+    var restingHTML = thumbwrap.innerHTML; // the frozen thumbnail state to return to
+    function play() { thumbwrap.innerHTML = liveIframeHTML(ref.video); }
+    function freeze() { thumbwrap.innerHTML = restingHTML; }
+
+    ref.el.addEventListener("mouseenter", play);
+    ref.el.addEventListener("mouseleave", freeze);
+    ref.el.addEventListener("focus", play);
+    ref.el.addEventListener("blur", freeze);
+  }
 
   function igniteCard(ref) {
-    var thumbwrap = ref.el.querySelector(".card__thumbwrap");
-    if (!thumbwrap || thumbwrap.querySelector("iframe")) return; // already ignited
-
-    var v = ref.video;
-    var src;
-    if (v.source === "bunny") {
-      src = "https://player.mediadelivery.net/embed/" + v.bunnyLibraryId +
-        "/" + encodeURIComponent(v.vimeoId) + "?autoplay=true&muted=true&loop=true";
-    } else {
-      src = "https://www.youtube.com/embed/" + encodeURIComponent(v.vimeoId) +
-        "?autoplay=1&mute=1&controls=0&loop=1&playlist=" + encodeURIComponent(v.vimeoId) +
-        "&rel=0&modestbranding=1";
-    }
-
-    thumbwrap.innerHTML =
-      '<iframe src="' + src + '" allow="autoplay" ' +
-      'style="position:absolute;inset:0;width:100%;height:100%;border:0;" frameborder="0"></iframe>';
+    if (ref.el.classList.contains("card--ignited")) return; // already ignited
     ref.el.classList.add("card--ignited");
+    armCardForHover(ref);
+  }
+
+  function igniteHero() {
+    var video = window.__ph1FeaturedVideo;
+    var wrap = document.querySelector(".hero__video-wrap");
+    if (!video || !wrap || wrap.querySelector("iframe")) return;
+    wrap.innerHTML = liveIframeHTML(video);
+    wrap.classList.add("is-visible");
   }
 
   function runCascade() {
@@ -454,16 +488,17 @@
       setTimeout(function () { bumper.setAttribute("hidden", ""); }, 550);
     }
 
-    // Card data loads asynchronously (live YouTube/Bunny lookups), so
-    // wait for at least one card to exist before cascading — give up
-    // quietly after ~10 seconds if something's genuinely wrong rather
-    // than polling forever.
+    // Card (and hero) data loads asynchronously (live YouTube/Bunny
+    // lookups), so wait for at least one card to exist before
+    // cascading — give up quietly after ~10 seconds if something's
+    // genuinely wrong rather than polling forever.
     var tries = 0;
     var waitForCards = setInterval(function () {
       tries++;
       if ((window.__ph1CardRefs || []).length > 0) {
         clearInterval(waitForCards);
         runCascade();
+        setTimeout(igniteHero, HERO_IGNITE_DELAY_MS);
       } else if (tries > 100) {
         clearInterval(waitForCards);
       }
