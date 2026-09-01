@@ -429,10 +429,15 @@
     "c9-gXAGRz_8", // Get To Know Principal Kray
     "PVGXRCtvYgY", // Hot Nuggets of Wisdom // Mr. Miller Weaves Baskets Underwater
     "r_JPw3KLRO0", // How To Use A High School Parking Lot
+    "QnfaDBXe5Tc", // Who Didn't Do My Homework
     "nr0GyrFVnSM", // Meet The Patrick Henry High Band
     "S015Z_mQefs", // You Are Not Alone PSA
     "Ed9cgZfvAOQ", // Cross Country At The Clovis Invitational
-    "xOmFjdyvNIk"  // Patriot Makes // Spooky Rice Krispie Treats
+    "xOmFjdyvNIk", // Patriot Makes // Spooky Rice Krispie Treats
+    "Ocf9BlMHamI", // PSA - The Lunch Runner
+    "ZVodO3nOm2U", // PH1 // E26 // 05.18.26
+    "irGcifYX5RY", // PH1 // E24 // 05.04.26 (May the Fourth Be With You Special)
+    "us4woPJdVJk"  // PH1 // E14 // 01.26.26
   ];
 
   // Shared by the hero and by cards — same muted/looping
