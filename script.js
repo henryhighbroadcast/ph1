@@ -445,7 +445,7 @@
     "Uxa02keHG48", // PH1 // S2 E1 // 08.24.26
     "MEMdrtmT7xg", // Checkout Girls Flag Football at PHHS
     "c9-gXAGRz_8", // Get To Know Principal Kray
-    "PVGXRCtvYgY", // Hot Nuggets of Wisdom // Mr. Miller Weaves Baskets Underwater
+    "CsRX6hLX2nw", // Patriot Makes // Spooky Slime
     "r_JPw3KLRO0", // How To Use A High School Parking Lot
     "QnfaDBXe5Tc", // Who Didn't Do My Homework
     "nr0GyrFVnSM", // Meet The Patrick Henry High Band
