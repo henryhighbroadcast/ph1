@@ -145,7 +145,7 @@ const VIDEOS = [
     category: "Segments & Highlights",
     title: "Hot Nuggets of Wisdom // Mr. Miller Weaves Baskets Underwater",
     description: "",
-    airDate: "2025-09-16"
+    airDate: "2025-09-12"
   },
   {
     vimeoId: "r_JPw3KLRO0",
@@ -177,7 +177,7 @@ const VIDEOS = [
     category: "Segments & Highlights",
     title: "Patriot Makes // Spooky Slime",
     description: "A very special how-to video by Sirena and Kaili.",
-    airDate: "2025-09-12"
+    airDate: "2025-09-16"
   },
   {
     vimeoId: "VNtR808ZfxU",
