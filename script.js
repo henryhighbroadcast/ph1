@@ -104,6 +104,7 @@
     var d = new Date(str + "T00:00:00");
     return d.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
   }
+  window.__ph1FmtDate = fmtDate; // used by the secret cascade trigger below
 
   function playVideo(video) {
     var modal = document.getElementById("playerModal");
@@ -242,7 +243,6 @@
 
     // ---- HERO ----
     const featured = sorted.find((v) => v.featured) || sorted[0];
-    window.__ph1FeaturedVideo = featured; // used by the secret cascade trigger below
     const hero = document.getElementById("hero");
     if (featured) {
       hero.innerHTML =
@@ -419,6 +419,12 @@
   var STAGGER_DELAY_MS = 3000;       // gap between each card after that
   var triggered = false;             // guards against double-firing on a held/repeated key
 
+  // This is a *different* hero than the normal one (S2E2) — it's the
+  // dedicated "going live" launch video, and it should only ever
+  // appear as the hero during this secret sequence, never on a normal
+  // visit. That's why it isn't marked featured in data.js.
+  var SECRET_HERO_VIMEO_ID = "ZQBS64-9pNU"; // PH1 // Season 2 // The Official Launch!
+
   // The exact "going live" lineup and order for the segment, by video
   // ID — deliberately curated rather than "whichever cards happen to
   // render first." Any ID not currently on the page is skipped quietly.
@@ -471,9 +477,25 @@
   }
 
   function igniteHero() {
-    var video = window.__ph1FeaturedVideo;
+    var refs = window.__ph1CardRefs || [];
+    var ref = refs.find(function (r) { return r.video.vimeoId === SECRET_HERO_VIMEO_ID; });
     var wrap = document.querySelector(".hero__video-wrap");
-    if (!video || !wrap || wrap.querySelector("iframe")) return;
+    if (!ref || !wrap || wrap.querySelector("iframe")) return;
+
+    // The normal hero (S2E2's title/description) is what's showing at
+    // this point — swap it over to the launch video's own info too,
+    // not just play its video underneath S2E2's unrelated text.
+    var video = ref.video;
+    var hero = document.getElementById("hero");
+    var titleEl = hero && hero.querySelector(".hero__title");
+    var metaEl = hero && hero.querySelector(".hero__meta");
+    var descEl = hero && hero.querySelector(".hero__desc");
+    if (titleEl) titleEl.textContent = video.title;
+    if (metaEl && window.__ph1FmtDate) {
+      metaEl.textContent = "AIRED " + window.__ph1FmtDate(video.airDate).toUpperCase();
+    }
+    if (descEl) descEl.textContent = video.description || "";
+
     wrap.innerHTML = liveIframeHTML(video);
     wrap.classList.add("is-visible");
   }

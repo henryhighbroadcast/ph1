@@ -49,8 +49,10 @@ const VIDEOS = [
     category: "Season 2026-27",
     title: "PH1 // Season 2 // The Official Launch!",
     description: "Sirena and iKaili launch the PH1 broadcast into the new school year!",
-    airDate: "2026-08-24",
-    featured: true
+    airDate: "2026-08-24"
+    // Deliberately not featured: this one is the hero only during the
+    // secret "~" going-live sequence (see script.js), not on a normal
+    // visit — S2E2 below is the real day-to-day hero.
   },
   {
     vimeoId: "fz-dYX6-6IM",
@@ -58,7 +60,8 @@ const VIDEOS = [
     category: "Season 2026-27",
     title: "PH1 // S2 E2 // 08.31.26",
     description: "From sewers to the streets, Julian and Roman are back in action with another thrilling episode of PH1, bringing their knunchuck skills and critical information the Patrick Henry Patriots need to make it through the week.",
-    airDate: "2026-08-31"
+    airDate: "2026-08-31",
+    featured: true
   },
   {
     vimeoId: "Uxa02keHG48",
