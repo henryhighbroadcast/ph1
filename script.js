@@ -236,6 +236,7 @@
       probe.src = video.thumbnail;
     });
   }
+  window.__ph1ResolveHeroThumbnail = resolveHeroThumbnail; // used by the secret cascade trigger below
 
   function render(videos) {
     window.__ph1CardRefs = []; // reset each render — used by the secret cascade trigger below
@@ -264,8 +265,19 @@
       hero.querySelector("#heroPlay").addEventListener("click", () => playVideo(featured));
       if (featured.thumbnail) {
         const heroBg = hero.querySelector(".hero__bg");
+        // Show the raw thumbnail immediately rather than waiting on the
+        // placeholder probe below — most thumbnails are fine, and this
+        // avoids a blank/stale hero background for that round-trip.
+        heroBg.style.backgroundImage = "url('" + featured.thumbnail + "')";
+        // Tags which video the hero is currently showing, so a
+        // slow-resolving probe from a video the hero has since moved
+        // on from (e.g. the secret sequence swapping it) can't stomp
+        // a newer one that resolved first. See applyHeroContent below.
+        hero.dataset.heroVideoId = featured.vimeoId;
         resolveHeroThumbnail(featured).then((url) => {
-          heroBg.style.backgroundImage = "url('" + url + "')";
+          if (hero.dataset.heroVideoId === featured.vimeoId) {
+            heroBg.style.backgroundImage = "url('" + url + "')";
+          }
         });
       }
     }
@@ -476,27 +488,43 @@
     ref.el.classList.add("card--ignited");
   }
 
-  function igniteHero() {
-    var refs = window.__ph1CardRefs || [];
-    var ref = refs.find(function (r) { return r.video.vimeoId === SECRET_HERO_VIMEO_ID; });
-    var wrap = document.querySelector(".hero__video-wrap");
-    if (!ref || !wrap || wrap.querySelector("iframe")) return;
-
-    // The normal hero (S2E2's title/description) is what's showing at
-    // this point — swap it over to the launch video's own info too,
-    // not just play its video underneath S2E2's unrelated text.
-    var video = ref.video;
+  // Swaps the hero's title/date/description/still-frame over to the
+  // launch video immediately (no visible beat showing S2E2 first) —
+  // separate from actually cutting to live playback, which follows
+  // after HERO_IGNITE_DELAY_MS so the still frame gets its moment.
+  function applyHeroContent(video) {
     var hero = document.getElementById("hero");
-    var titleEl = hero && hero.querySelector(".hero__title");
-    var metaEl = hero && hero.querySelector(".hero__meta");
-    var descEl = hero && hero.querySelector(".hero__desc");
+    if (!hero) return;
+    var titleEl = hero.querySelector(".hero__title");
+    var metaEl = hero.querySelector(".hero__meta");
+    var descEl = hero.querySelector(".hero__desc");
+    var heroBg = hero.querySelector(".hero__bg");
     if (titleEl) titleEl.textContent = video.title;
     if (metaEl && window.__ph1FmtDate) {
       metaEl.textContent = "AIRED " + window.__ph1FmtDate(video.airDate).toUpperCase();
     }
     if (descEl) descEl.textContent = video.description || "";
+    hero.dataset.heroVideoId = video.vimeoId; // see the matching guard in render() above
+    if (heroBg && video.thumbnail) {
+      // Show the raw thumbnail immediately (same reasoning as render()
+      // above) instead of leaving S2E2's background up during the probe.
+      heroBg.style.backgroundImage = "url('" + video.thumbnail + "')";
+    }
+    if (heroBg && video.thumbnail && window.__ph1ResolveHeroThumbnail) {
+      window.__ph1ResolveHeroThumbnail(video).then(function (url) {
+        if (hero.dataset.heroVideoId === video.vimeoId) {
+          heroBg.style.backgroundImage = "url('" + url + "')";
+        }
+      });
+    }
+  }
 
-    wrap.innerHTML = liveIframeHTML(video);
+  function igniteHero() {
+    var refs = window.__ph1CardRefs || [];
+    var ref = refs.find(function (r) { return r.video.vimeoId === SECRET_HERO_VIMEO_ID; });
+    var wrap = document.querySelector(".hero__video-wrap");
+    if (!ref || !wrap || wrap.querySelector("iframe")) return;
+    wrap.innerHTML = liveIframeHTML(ref.video);
     wrap.classList.add("is-visible");
   }
 
@@ -528,8 +556,16 @@
     var tries = 0;
     var waitForCards = setInterval(function () {
       tries++;
-      if ((window.__ph1CardRefs || []).length > 0) {
+      var refs = window.__ph1CardRefs || [];
+      if (refs.length > 0) {
         clearInterval(waitForCards);
+
+        // Swap the hero over to the launch video's still frame right
+        // away — otherwise S2E2 (the normal hero) shows for a beat
+        // first, which reads as a mistake rather than a cut.
+        var heroRef = refs.find(function (r) { return r.video.vimeoId === SECRET_HERO_VIMEO_ID; });
+        if (heroRef) applyHeroContent(heroRef.video);
+
         runCascade();
         setTimeout(igniteHero, HERO_IGNITE_DELAY_MS);
       } else if (tries > 100) {
