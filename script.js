@@ -104,7 +104,6 @@
     var d = new Date(str + "T00:00:00");
     return d.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
   }
-  window.__ph1FmtDate = fmtDate; // used by the secret cascade trigger below
 
   function playVideo(video) {
     var modal = document.getElementById("playerModal");
@@ -207,9 +206,6 @@
       }
     });
 
-    window.__ph1CardRefs = window.__ph1CardRefs || [];
-    window.__ph1CardRefs.push({ el: card, video: video });
-
     return card;
   }
 
@@ -236,10 +232,8 @@
       probe.src = video.thumbnail;
     });
   }
-  window.__ph1ResolveHeroThumbnail = resolveHeroThumbnail; // used by the secret cascade trigger below
 
   function render(videos) {
-    window.__ph1CardRefs = []; // reset each render — used by the secret cascade trigger below
     const sorted = [...videos].sort((a, b) => (a.airDate < b.airDate ? 1 : -1));
 
     // ---- HERO ----
@@ -248,7 +242,6 @@
     if (featured) {
       hero.innerHTML =
         '<div class="hero__bg"></div>' +
-        '<div class="hero__video-wrap"></div>' +
         '<div class="hero__inner">' +
           '<span class="hero__tag">New Episode</span>' +
           '<h1 class="hero__title"></h1>' +
@@ -267,17 +260,10 @@
         const heroBg = hero.querySelector(".hero__bg");
         // Show the raw thumbnail immediately rather than waiting on the
         // placeholder probe below — most thumbnails are fine, and this
-        // avoids a blank/stale hero background for that round-trip.
+        // avoids a blank hero background for that round-trip.
         heroBg.style.backgroundImage = "url('" + featured.thumbnail + "')";
-        // Tags which video the hero is currently showing, so a
-        // slow-resolving probe from a video the hero has since moved
-        // on from (e.g. the secret sequence swapping it) can't stomp
-        // a newer one that resolved first. See applyHeroContent below.
-        hero.dataset.heroVideoId = featured.vimeoId;
         resolveHeroThumbnail(featured).then((url) => {
-          if (hero.dataset.heroVideoId === featured.vimeoId) {
-            heroBg.style.backgroundImage = "url('" + url + "')";
-          }
+          heroBg.style.backgroundImage = "url('" + url + "')";
         });
       }
     }
@@ -414,167 +400,5 @@
     fetchUploaderVideos()
   ]).then(function (results) {
     render(results[0].concat(results[1]));
-  });
-})();
-
-// ============================================================
-// SECRET "GOING LIVE" EASTER EGG — press ~ to skip the normal
-// intro. A specific, ordered lineup of cards ignites into live,
-// muted, looping playback one at a time, then the hero itself
-// cuts from its still frame to live playback a few seconds
-// later. Built for filming an intro segment; harmless to leave
-// live permanently since nobody will find it by accident.
-// ============================================================
-(function () {
-  var HERO_IGNITE_DELAY_MS = 2000;   // how long the hero holds on its still frame first
-  var CASCADE_START_DELAY_MS = 3000; // gap after the hero before the first card ignites
-  var STAGGER_DELAY_MS = 3000;       // gap between each card after that
-  var triggered = false;             // guards against double-firing on a held/repeated key
-
-  // This is a *different* hero than the normal one (S2E2) — it's the
-  // dedicated "going live" launch video, and it should only ever
-  // appear as the hero during this secret sequence, never on a normal
-  // visit. That's why it isn't marked featured in data.js.
-  var SECRET_HERO_VIMEO_ID = "ZQBS64-9pNU"; // PH1 // Season 2 // The Official Launch!
-
-  // The exact "going live" lineup and order for the segment, by video
-  // ID — deliberately curated rather than "whichever cards happen to
-  // render first." Any ID not currently on the page is skipped quietly.
-  var CASCADE_ORDER = [
-    "fz-dYX6-6IM", // PH1 // S2 E2 // 08.31.26
-    "Uxa02keHG48", // PH1 // S2 E1 // 08.24.26
-    "MEMdrtmT7xg", // Checkout Girls Flag Football at PHHS
-    "c9-gXAGRz_8", // Get To Know Principal Kray
-    "CsRX6hLX2nw", // Patriot Makes // Spooky Slime
-    "r_JPw3KLRO0", // How To Use A High School Parking Lot
-    "QnfaDBXe5Tc", // Who Didn't Do My Homework
-    "nr0GyrFVnSM", // Meet The Patrick Henry High Band
-    "S015Z_mQefs", // You Are Not Alone PSA
-    "Ed9cgZfvAOQ", // Cross Country At The Clovis Invitational
-    "xOmFjdyvNIk", // Patriot Makes // Spooky Rice Krispie Treats
-    "Ocf9BlMHamI", // PSA - The Lunch Runner
-    "ZVodO3nOm2U", // PH1 // E26 // 05.18.26
-    "irGcifYX5RY", // PH1 // E24 // 05.04.26 (May the Fourth Be With You Special)
-    "us4woPJdVJk"  // PH1 // E14 // 01.26.26
-  ];
-
-  // Shared by the hero and by cards — same muted/looping
-  // background-video treatment, just aimed at different elements.
-  function liveEmbedSrc(v) {
-    if (v.source === "bunny") {
-      return "https://player.mediadelivery.net/embed/" + v.bunnyLibraryId +
-        "/" + encodeURIComponent(v.vimeoId) + "?autoplay=true&muted=true&loop=true";
-    }
-    return "https://www.youtube.com/embed/" + encodeURIComponent(v.vimeoId) +
-      "?autoplay=1&mute=1&controls=0&disablekb=1&fs=0&iv_load_policy=3&loop=1&playlist=" +
-      encodeURIComponent(v.vimeoId) + "&rel=0&modestbranding=1";
-  }
-
-  // pointer-events:none so these are purely decorative — otherwise the
-  // cursor passing over one lands ON YouTube's own iframe content, and
-  // it reveals its native play/pause + skip chrome even with
-  // controls=0. With pointer-events:none the browser routes hover and
-  // clicks straight through to the card underneath instead.
-  function liveIframeHTML(v) {
-    return '<iframe src="' + liveEmbedSrc(v) + '" allow="autoplay" tabindex="-1" ' +
-      'style="position:absolute;inset:0;width:100%;height:100%;border:0;pointer-events:none;" ' +
-      'frameborder="0"></iframe>';
-  }
-
-  function igniteCard(ref) {
-    var thumbwrap = ref.el.querySelector(".card__thumbwrap");
-    if (!thumbwrap || thumbwrap.querySelector("iframe")) return; // already ignited
-    thumbwrap.innerHTML = liveIframeHTML(ref.video);
-    ref.el.classList.add("card--ignited");
-  }
-
-  // Swaps the hero's title/date/description/still-frame over to the
-  // launch video immediately (no visible beat showing S2E2 first) —
-  // separate from actually cutting to live playback, which follows
-  // after HERO_IGNITE_DELAY_MS so the still frame gets its moment.
-  function applyHeroContent(video) {
-    var hero = document.getElementById("hero");
-    if (!hero) return;
-    var titleEl = hero.querySelector(".hero__title");
-    var metaEl = hero.querySelector(".hero__meta");
-    var descEl = hero.querySelector(".hero__desc");
-    var heroBg = hero.querySelector(".hero__bg");
-    if (titleEl) titleEl.textContent = video.title;
-    if (metaEl && window.__ph1FmtDate) {
-      metaEl.textContent = "AIRED " + window.__ph1FmtDate(video.airDate).toUpperCase();
-    }
-    if (descEl) descEl.textContent = video.description || "";
-    hero.dataset.heroVideoId = video.vimeoId; // see the matching guard in render() above
-    if (heroBg && video.thumbnail) {
-      // Show the raw thumbnail immediately (same reasoning as render()
-      // above) instead of leaving S2E2's background up during the probe.
-      heroBg.style.backgroundImage = "url('" + video.thumbnail + "')";
-    }
-    if (heroBg && video.thumbnail && window.__ph1ResolveHeroThumbnail) {
-      window.__ph1ResolveHeroThumbnail(video).then(function (url) {
-        if (hero.dataset.heroVideoId === video.vimeoId) {
-          heroBg.style.backgroundImage = "url('" + url + "')";
-        }
-      });
-    }
-  }
-
-  function igniteHero() {
-    var refs = window.__ph1CardRefs || [];
-    var ref = refs.find(function (r) { return r.video.vimeoId === SECRET_HERO_VIMEO_ID; });
-    var wrap = document.querySelector(".hero__video-wrap");
-    if (!ref || !wrap || wrap.querySelector("iframe")) return;
-    wrap.innerHTML = liveIframeHTML(ref.video);
-    wrap.classList.add("is-visible");
-  }
-
-  function runCascade() {
-    var refs = window.__ph1CardRefs || [];
-    var startAt = HERO_IGNITE_DELAY_MS + CASCADE_START_DELAY_MS; // first card follows the hero
-    CASCADE_ORDER.forEach(function (vimeoId, i) {
-      var ref = refs.find(function (r) { return r.video.vimeoId === vimeoId; });
-      if (!ref) return; // that video isn't currently on the page — skip it
-      setTimeout(function () { igniteCard(ref); }, startAt + i * STAGGER_DELAY_MS);
-    });
-  }
-
-  function triggerSecretMode() {
-    if (triggered) return;
-    triggered = true;
-
-    // Skip straight past the normal static-frame/Tune-In/video flow.
-    var bumper = document.getElementById("introBumper");
-    if (bumper && !bumper.hasAttribute("hidden")) {
-      bumper.classList.add("is-hidden");
-      setTimeout(function () { bumper.setAttribute("hidden", ""); }, 550);
-    }
-
-    // Card (and hero) data loads asynchronously (live YouTube/Bunny
-    // lookups), so wait for at least one card to exist before
-    // cascading — give up quietly after ~10 seconds if something's
-    // genuinely wrong rather than polling forever.
-    var tries = 0;
-    var waitForCards = setInterval(function () {
-      tries++;
-      var refs = window.__ph1CardRefs || [];
-      if (refs.length > 0) {
-        clearInterval(waitForCards);
-
-        // Swap the hero over to the launch video's still frame right
-        // away — otherwise S2E2 (the normal hero) shows for a beat
-        // first, which reads as a mistake rather than a cut.
-        var heroRef = refs.find(function (r) { return r.video.vimeoId === SECRET_HERO_VIMEO_ID; });
-        if (heroRef) applyHeroContent(heroRef.video);
-
-        runCascade();
-        setTimeout(igniteHero, HERO_IGNITE_DELAY_MS);
-      } else if (tries > 100) {
-        clearInterval(waitForCards);
-      }
-    }, 100);
-  }
-
-  document.addEventListener("keydown", function (e) {
-    if (e.key === "~") triggerSecretMode();
   });
 })();

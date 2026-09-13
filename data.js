@@ -44,17 +44,6 @@ const SITE = {
 const VIDEOS = [
   // ---- Season 2026-27 ----
   {
-    vimeoId: "ZQBS64-9pNU",
-    source: "youtube",
-    category: "Season 2026-27",
-    title: "PH1 // Season 2 // The Official Launch!",
-    description: "Sirena and iKaili launch the PH1 broadcast into the new school year!",
-    airDate: "2026-08-24"
-    // Deliberately not featured: this one is the hero only during the
-    // secret "~" going-live sequence (see script.js), not on a normal
-    // visit — S2E2 below is the real day-to-day hero.
-  },
-  {
     vimeoId: "fz-dYX6-6IM",
     source: "youtube",
     category: "Season 2026-27",
