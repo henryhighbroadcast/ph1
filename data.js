@@ -44,13 +44,21 @@ const SITE = {
 const VIDEOS = [
   // ---- Season 2026-27 ----
   {
+    vimeoId: "EzsOH17dMNA",
+    source: "youtube",
+    category: "Season 2026-27",
+    title: "PH1 // S2 E3 // 09.14.26",
+    description: "Sirena and iKaili launch the PH1 broadcast for the official start of the season! Check out what's going on with Surf Rider Club, Boys Water Polo, and the start of Hispanic Heritage Month! Oh, and if you need a job permit, Pat-Burtos has you covered.",
+    airDate: "2026-09-14",
+    featured: true
+  },
+  {
     vimeoId: "fz-dYX6-6IM",
     source: "youtube",
     category: "Season 2026-27",
     title: "PH1 // S2 E2 // 08.31.26",
     description: "From sewers to the streets, Julian and Roman are back in action with another thrilling episode of PH1, bringing their knunchuck skills and critical information the Patrick Henry Patriots need to make it through the week.",
-    airDate: "2026-08-31",
-    featured: true
+    airDate: "2026-08-31"
   },
   {
     vimeoId: "Uxa02keHG48",
