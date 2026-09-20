@@ -44,13 +44,21 @@ const SITE = {
 const VIDEOS = [
   // ---- Season 2026-27 ----
   {
+    vimeoId: "zYjjAfUe4w4",
+    source: "youtube",
+    category: "Season 2026-27",
+    title: "PH1 // S2 E4 // 09.21.26",
+    description: "You asked the question and Lucas and Frederick stumbled upon a rarity with Verity... and a verified new episode of PH1. Jam-packed with spotlight on Cross Country, a look inside Mr. Hernandez's classroom, a big rec for Tita's Tacos in La Mesa, a shoutout to Rock Band Club, and three points for the NFL Kickoff.",
+    airDate: "2026-09-21",
+    featured: true
+  },
+  {
     vimeoId: "EzsOH17dMNA",
     source: "youtube",
     category: "Season 2026-27",
     title: "PH1 // S2 E3 // 09.14.26",
     description: "Sirena and iKaili launch the PH1 broadcast for the official start of the season! Check out what's going on with Surf Rider Club, Boys Water Polo, and the start of Hispanic Heritage Month! Oh, and if you need a job permit, Pat-Burtos has you covered.",
-    airDate: "2026-09-14",
-    featured: true
+    airDate: "2026-09-14"
   },
   {
     vimeoId: "fz-dYX6-6IM",
