@@ -201,8 +201,8 @@ button{ font-family: inherit; cursor: pointer; }
   content:"";
   position:absolute; inset:0; z-index:1;
   background:
-    linear-gradient(180deg, rgba(5,5,5,0.35) 0%, rgba(5,5,5,0.15) 30%, rgba(5,5,5,0.75) 78%, var(--bg) 100%),
-    linear-gradient(90deg, rgba(5,5,5,0.75) 0%, rgba(5,5,5,0.15) 45%, rgba(5,5,5,0.05) 100%);
+    linear-gradient(180deg, rgba(5,5,5,0.175) 0%, rgba(5,5,5,0.075) 30%, rgba(5,5,5,0.375) 78%, var(--bg) 100%),
+    linear-gradient(90deg, rgba(5,5,5,0.375) 0%, rgba(5,5,5,0.075) 45%, rgba(5,5,5,0.025) 100%);
 }
 .hero__inner{ position:relative; z-index:2; max-width: 680px; }
 .hero__tag{
