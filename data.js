@@ -26,6 +26,12 @@
                     on YouTube, so it'll just be blank if you skip it
      - airDate    : "YYYY-MM-DD", controls sort order
      - featured   : true/false — true puts it in the hero banner
+     - hideHeroTitle: true/false — optional, only matters on the
+                    featured video. Set to true when that week's
+                    thumbnail already has the episode title baked into
+                    the image, so the bold on-page title wouldn't be
+                    redundant text over it. Leave off (or false) most
+                    weeks — the title still shows normally.
    ============================================================ */
 
 const SITE = {
@@ -50,7 +56,8 @@ const VIDEOS = [
     title: "PH1 // S2 E4 // 09.21.26",
     description: "You asked the question and Lucas and Frederick stumbled upon a rarity with Verity... and a verified new episode of PH1. Jam-packed with spotlight on Cross Country, a look inside Mr. Hernandez's classroom, a big rec for Tita's Tacos in La Mesa, a shoutout to Rock Band Club, and three points for the NFL Kickoff.",
     airDate: "2026-09-21",
-    featured: true
+    featured: true,
+    hideHeroTitle: true // this week's thumbnail has the title baked in
   },
   {
     vimeoId: "EzsOH17dMNA",

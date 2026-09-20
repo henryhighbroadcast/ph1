@@ -252,7 +252,13 @@
             '<a class="btn btn--ghost" href="#' + slug(featured.category) + '">More Episodes</a>' +
           '</div>' +
         '</div>';
-      hero.querySelector(".hero__title").textContent = featured.title;
+      const heroTitleEl = hero.querySelector(".hero__title");
+      heroTitleEl.textContent = featured.title;
+      // Some weeks the thumbnail already has the episode title baked
+      // into the image itself — the bold on-page title would just be
+      // redundant text sitting on top of it, so this is an opt-in per
+      // video, not a permanent change.
+      heroTitleEl.style.display = featured.hideHeroTitle ? "none" : "";
       hero.querySelector(".hero__meta").textContent = "AIRED " + fmtDate(featured.airDate).toUpperCase();
       hero.querySelector(".hero__desc").textContent = featured.description || "";
       hero.querySelector("#heroPlay").addEventListener("click", () => playVideo(featured));
