@@ -86,6 +86,14 @@ const VIDEOS = [
 
   // ---- Critically Acclaimed ----
   {
+    vimeoId: "-Ngnae4TKRk",
+    source: "youtube",
+    category: "Critically Acclaimed",
+    title: "Holy Cow",
+    description: "When Devon picks up the night shift at the warehouse, she gets an utterly brutal surprise.\nStarring Aubrey and Allison\nDirected by Gabby\nEdited by Alice\nProduced by Emma",
+    airDate: "2026-09-23"
+  },
+  {
     vimeoId: "S015Z_mQefs",
     source: "youtube",
     category: "Critically Acclaimed",
