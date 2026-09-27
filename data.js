@@ -50,14 +50,21 @@ const SITE = {
 const VIDEOS = [
   // ---- Season 2026-27 ----
   {
+    vimeoId: "2dTEQXwHBSk",
+    source: "youtube",
+    category: "Season 2026-27",
+    title: "PH1 // S2 E5 // 09.28.26",
+    description: "Becks and Potts go deep this week on what's happening at Patrick Henry: ASB reveals the HoCo theme, Yearbook sales, fall recipes, and Can You Guess the Number?",
+    airDate: "2026-09-28",
+    featured: true
+  },
+  {
     vimeoId: "zYjjAfUe4w4",
     source: "youtube",
     category: "Season 2026-27",
     title: "PH1 // S2 E4 // 09.21.26",
     description: "You asked the question and Lucas and Frederick stumbled upon a rarity with Verity... and a verified new episode of PH1. Jam-packed with spotlight on Cross Country, a look inside Mr. Hernandez's classroom, a big rec for Tita's Tacos in La Mesa, a shoutout to Rock Band Club, and three points for the NFL Kickoff.",
-    airDate: "2026-09-21",
-    featured: true,
-    hideHeroTitle: true // this week's thumbnail has the title baked in
+    airDate: "2026-09-21"
   },
   {
     vimeoId: "EzsOH17dMNA",
