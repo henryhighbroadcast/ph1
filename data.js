@@ -50,13 +50,21 @@ const SITE = {
 const VIDEOS = [
   // ---- Season 2026-27 ----
   {
+    vimeoId: "PSVjU-zza_w",
+    source: "youtube",
+    category: "Season 2026-27",
+    title: "PH1 // S2 E6 // 10.05.26",
+    description: "To start off October, Izzy and Jackson get a mysterious call from inside the Stu. Then, we hear from our very own Women's Golf legend, our boys learn what the new ACL List is, and Mrs. Crawford duels Frederick in a battle over niche soda flavors.",
+    airDate: "2026-10-05",
+    featured: true
+  },
+  {
     vimeoId: "2dTEQXwHBSk",
     source: "youtube",
     category: "Season 2026-27",
     title: "PH1 // S2 E5 // 09.28.26",
     description: "Becks and Potts go deep this week on what's happening at Patrick Henry: ASB reveals the HoCo theme, Yearbook sales, fall recipes, and Can You Guess the Number?",
-    airDate: "2026-09-28",
-    featured: true
+    airDate: "2026-09-28"
   },
   {
     vimeoId: "zYjjAfUe4w4",
