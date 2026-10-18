@@ -50,13 +50,21 @@ const SITE = {
 const VIDEOS = [
   // ---- Season 2026-27 ----
   {
+    vimeoId: "de8PyMQrk-g",
+    source: "youtube",
+    category: "Season 2026-27",
+    title: "PH1 // S2 E7 // 10.19.26",
+    description: "Aby and Bailey get in the Spirit for Halloween, as we take a trip to Spirit Halloween, take an inside look at our undefeated football team, and see how well our Patriots know their campus geography.",
+    airDate: "2026-10-19",
+    featured: true
+  },
+  {
     vimeoId: "PSVjU-zza_w",
     source: "youtube",
     category: "Season 2026-27",
     title: "PH1 // S2 E6 // 10.05.26",
     description: "To start off October, Izzy and Jackson get a mysterious call from inside the Stu. Then, we hear from our very own Women's Golf legend, our boys learn what the new ACL List is, and Mrs. Crawford duels Frederick in a battle over niche soda flavors.",
-    airDate: "2026-10-05",
-    featured: true
+    airDate: "2026-10-05"
   },
   {
     vimeoId: "2dTEQXwHBSk",
