@@ -167,6 +167,14 @@ const VIDEOS = [
 
   // ---- Segments & Highlights ----
   {
+    vimeoId: "2Zwgb88enjs",
+    source: "youtube",
+    category: "Segments & Highlights",
+    title: "PH1 Presents // This Is Spirit Halloween (Directors Cut)",
+    description: "The unnerfed Liam(s) cut.",
+    airDate: "2026-10-20"
+  },
+  {
     vimeoId: "MEMdrtmT7xg",
     source: "youtube",
     category: "Segments & Highlights",
