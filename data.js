@@ -50,13 +50,21 @@ const SITE = {
 const VIDEOS = [
   // ---- Season 2026-27 ----
   {
+    vimeoId: "r1BlYh4Oe9Q",
+    source: "youtube",
+    category: "Season 2026-27",
+    title: "PH1 // S2 E8 // 10.26.26",
+    description: "Miguel and Amari get lost in a corn maze as they take us through this week's news: the Cats in Hats get us ready for Halloween, we learn to not slow walk it to class, and whats on your candy tier list? All that and Sports at Patrick Henry.",
+    airDate: "2026-10-26",
+    featured: true
+  },
+  {
     vimeoId: "de8PyMQrk-g",
     source: "youtube",
     category: "Season 2026-27",
     title: "PH1 // S2 E7 // 10.19.26",
     description: "Aby and Bailey get in the Spirit for Halloween, as we take a trip to Spirit Halloween, take an inside look at our undefeated football team, and see how well our Patriots know their campus geography.",
-    airDate: "2026-10-19",
-    featured: true
+    airDate: "2026-10-19"
   },
   {
     vimeoId: "PSVjU-zza_w",
