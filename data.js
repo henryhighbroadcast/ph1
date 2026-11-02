@@ -50,13 +50,21 @@ const SITE = {
 const VIDEOS = [
   // ---- Season 2026-27 ----
   {
+    vimeoId: "ZcV_T4J4H4Q",
+    source: "youtube",
+    category: "Season 2026-27",
+    title: "PH1 // S2 E09 // 11.02.26",
+    description: "Liam and and Lucas take us through a quick Broadcast, in order to make time for a District Survey on the Grade Level Canvas pages.",
+    airDate: "2026-11-02",
+    featured: true
+  },
+  {
     vimeoId: "r1BlYh4Oe9Q",
     source: "youtube",
     category: "Season 2026-27",
     title: "PH1 // S2 E8 // 10.26.26",
     description: "Miguel and Amari get lost in a corn maze as they take us through this week's news: the Cats in Hats get us ready for Halloween, we learn to not slow walk it to class, and whats on your candy tier list? All that and Sports at Patrick Henry.",
-    airDate: "2026-10-26",
-    featured: true
+    airDate: "2026-10-26"
   },
   {
     vimeoId: "de8PyMQrk-g",
